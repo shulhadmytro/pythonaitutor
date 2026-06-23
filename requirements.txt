@@ -1,0 +1,8 @@
+streamlit
+streamlit-authenticator
+pyyaml
+chromadb
+sentence-transformers
+deep-translator
+datasets
+bcrypt
