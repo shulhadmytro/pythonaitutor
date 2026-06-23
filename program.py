@@ -15,7 +15,7 @@ import bcrypt
 # ХЕЛПЕРИ ДЛЯ РОБОТИ З ФАЙЛАМИ
 # ==========================================
 def save_config(config_data):
-    """Безпечне збереження конфігурації користувачів."""
+    """Без配чне збереження конфігурації користувачів."""
     try:
         with open('config.yaml', 'w', encoding='utf-8') as f:
             yaml.dump(config_data, f, default_flow_style=False, allow_unicode=True)
@@ -260,8 +260,8 @@ st.markdown(
 )
 
 translations = {
-    "UA": {"title": "Python AI Tutor", "menu": "📜 Ваші чати", "new_chat": "+ Новий чат", "settings": "⚙️ Налаштування", "back": "←", "rename": "✏️ Назва", "delete": "🗑️ Видалити", "input_placeholder": "Запитайте щось про Python...", "lang_label": "Мова", "save": "OK", "source_local": "🏠 Теорія", "source_cf": "🧠 Алгоритми", "trash_title": "🗑️ Кошик", "trash_empty": "Кошик порожній", "restore": "🔄 Відновити", "clear_trash": "🚨 Очистити кошик", "edit_msg": "✏️ Редагувати", "cancel": "Скасувати", "llm_toggle": "🤖 Використивувати Google Gemini (API)", "logout": "🚪 Вийти з акаунта"},
-    "EN": {"title": "Python AI Tutor", "menu": "📜 Your Chats", "new_chat": "+ New Chat", "settings": "⚙️ Settings", "back": "←", "rename": "✏️ Rename", "delete": "🗑️ Delete", "input_placeholder": "Ask something about Python...", "lang_label": "Language", "save": "OK", "source_local": "🏠 Theory", "source_cf": "🧠 Algorithms", "trash_title": "🗑️ Trash Bin", "trash_empty": "Trash is empty", "restore": "🔄 Restore", "clear_trash": "🚨 Empty Trash", "edit_msg": "✏️ Edit", "cancel": "Cancel", "llm_toggle": "🤖 Use Google Gemini (API)", "logout": "🚪 Log Out"}
+    "UA": {"title": "Python AI Tutor", "menu": "📜 Ваші чати", "new_chat": "+ Новий чат", "settings": "⚙️ Налаштування", "back": "← Назад до чату", "rename": "✏️ Назва", "delete": "🗑️ Видалити", "input_placeholder": "Запитайте щось про Python...", "lang_label": "Мова", "save": "OK", "source_local": "🏠 Теорія", "source_cf": "🧠 Алгоритми", "trash_title": "🗑️ Кошик", "trash_empty": "Кошик порожній", "restore": "🔄 Відновити", "clear_trash": "🚨 Очистити кошик", "edit_msg": "✏️ Редагувати", "cancel": "Скасувати", "llm_toggle": "🤖 Використивувати Google Gemini (API)", "logout": "🚪 Вийти з акаунта"},
+    "EN": {"title": "Python AI Tutor", "menu": "📜 Your Chats", "new_chat": "+ New Chat", "settings": "⚙️ Settings", "back": "← Back to Chat", "rename": "✏️ Rename", "delete": "🗑️ Delete", "input_placeholder": "Ask something about Python...", "lang_label": "Language", "save": "OK", "source_local": "🏠 Theory", "source_cf": "🧠 Algorithms", "trash_title": "🗑️ Trash Bin", "trash_empty": "Trash is empty", "restore": "🔄 Restore", "clear_trash": "🚨 Empty Trash", "edit_msg": "✏️ Edit", "cancel": "Cancel", "llm_toggle": "🤖 Use Google Gemini (API)", "logout": "🚪 Log Out"}
 }
 t = translations[st.session_state.language]
 
@@ -299,13 +299,10 @@ with st.sidebar:
         st.markdown(f"👤 Користувач: **{USER_FULL_NAME}**")
         
     st.write("---")
-
-    if st.session_state.settings_mode:
-        if st.button(t["back"], key="back_to_chat_btn", use_container_width=True):
-            exit_settings()
-            st.rerun()
         
     st.title(t["menu"])
+    
+    # Кнопка створення нового чату (тепер стабільно скидає режим налаштувань)
     if st.button(t["new_chat"], use_container_width=True, type="primary"):
         st.session_state.current_chat_id = "New Chat"
         st.session_state.messages = []
@@ -316,12 +313,13 @@ with st.sidebar:
     
     st.write("---")
     
+    # Список чатів
     for chat_id in reversed(list(st.session_state.chat_archive.keys())):
         cols = st.columns([0.85, 0.15])
         if cols[0].button(chat_id, key=f"sel_{chat_id}", use_container_width=True):
             st.session_state.current_chat_id = chat_id
             st.session_state.messages = st.session_state.chat_archive[chat_id]
-            st.session_state.settings_mode = False
+            st.session_state.settings_mode = False  # Перемикаємось з налаштувань на обраний чат
             st.session_state.editing_msg_idx = None
             st.session_state.previous_chat_id = chat_id
             st.rerun()
@@ -347,7 +345,10 @@ with st.sidebar:
                 st.rerun()
 
     st.markdown("<div style='height: 10vh'></div>", unsafe_allow_html=True)
-    if st.button(t["settings"], use_container_width=True):
+    
+    # Зміна тексту та поведінки кнопки залежно від стану
+    button_text = t["back"] if st.session_state.settings_mode else t["settings"]
+    if st.button(button_text, key="toggle_settings_btn", use_container_width=True):
         if st.session_state.settings_mode: 
             exit_settings()
         else:
@@ -409,12 +410,8 @@ if st.session_state.settings_mode:
             st.session_state.clear()
             st.rerun()
     else:
-        # ВИПРАВЛЕНО: Використовуємо вбудовану кнопку logout від бібліотеки.
-        # Вона автоматично зачистить cookies і оновить стан сесії без багів.
         authenticator.logout(t["logout"], 'main')
         
-        # Якщо бібліотека скинула сесію (користувач натиснув на кнопку виходу),
-        # налаштовуємо стейт під вікно логіну та робимо очищення
         if st.session_state.get("authentication_status") is None:
             st.session_state["is_guest"] = False
             st.session_state["auth_page"] = "login"
