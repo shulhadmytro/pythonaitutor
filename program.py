@@ -148,7 +148,7 @@ USER_FULL_NAME = st.session_state.get("name", "Гість")
 IS_GUEST = st.session_state.get("is_guest", False)
 HISTORY_FILE = None if IS_GUEST else f"chat_history_{USERNAME}.json"
 
-API_KEY = "ВАШ_GEMINI_API_КЛЮЧ" 
+API_KEY = "AQ.Ab8RN6Kco8jwXkdJf-U1Vc7rP4fH74pFtxSzZsN1bMzAH02jHQ" 
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
 
 # ==========================================
