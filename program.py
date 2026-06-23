@@ -15,7 +15,7 @@ import bcrypt
 # ХЕЛПЕРИ ДЛЯ РОБОТИ З ФАЙЛАМИ
 # ==========================================
 def save_config(config_data):
-    """Без配чне збереження конфігурації користувачів."""
+    """Безпечне збереження конфігурації користувачів."""
     try:
         with open('config.yaml', 'w', encoding='utf-8') as f:
             yaml.dump(config_data, f, default_flow_style=False, allow_unicode=True)
@@ -251,9 +251,11 @@ for key, value in defaults.items():
     if key not in st.session_state:
         st.session_state[key] = value
 
+# ВИПРАВЛЕНО: Змінені стилі. Не ховаємо stHeader повністю, щоб не зникала стрілка бічної панелі.
 st.markdown(
     "<style>"
-    "[data-testid='stHeader'], [data-testid='stAppDeployButton'] {display:none!important;} "
+    "[data-testid='stAppDeployButton'], [data-testid='stToolbar'] {display:none!important;} "
+    "[data-testid='stMainBlockContainer'] {padding-top:2rem!important;} "
     ".edit-btn button {padding:2px 8px!important; font-size:12px!important; min-height:24px!important;}"
     "</style>", 
     unsafe_allow_html=True
@@ -302,7 +304,7 @@ with st.sidebar:
         
     st.title(t["menu"])
     
-    # Кнопка створення нового чату (тепер стабільно скидає режим налаштувань)
+    # Кнопка створення нового чату
     if st.button(t["new_chat"], use_container_width=True, type="primary"):
         st.session_state.current_chat_id = "New Chat"
         st.session_state.messages = []
@@ -319,7 +321,7 @@ with st.sidebar:
         if cols[0].button(chat_id, key=f"sel_{chat_id}", use_container_width=True):
             st.session_state.current_chat_id = chat_id
             st.session_state.messages = st.session_state.chat_archive[chat_id]
-            st.session_state.settings_mode = False  # Перемикаємось з налаштувань на обраний чат
+            st.session_state.settings_mode = False
             st.session_state.editing_msg_idx = None
             st.session_state.previous_chat_id = chat_id
             st.rerun()
@@ -346,7 +348,7 @@ with st.sidebar:
 
     st.markdown("<div style='height: 10vh'></div>", unsafe_allow_html=True)
     
-    # Зміна тексту та поведінки кнопки залежно від стану
+    # Стабільна кнопка налаштувань, що змінює назву залежно від стану
     button_text = t["back"] if st.session_state.settings_mode else t["settings"]
     if st.button(button_text, key="toggle_settings_btn", use_container_width=True):
         if st.session_state.settings_mode: 
