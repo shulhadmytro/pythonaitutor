@@ -273,7 +273,12 @@ def load_resources():
         return SentenceTransformer('all-MiniLM-L6-v2'), None
 
 model, collection = load_resources()
-st.set_page_config(page_title=t["title"], page_icon="🎓", layout="wide")
+st.set_page_config(
+    page_title=t["title"], 
+    page_icon="🎓", 
+    layout="wide", 
+    initial_sidebar_state="expanded"
+)
 
 def exit_settings():
     st.session_state.settings_mode = False
@@ -295,9 +300,10 @@ with st.sidebar:
         
     st.write("---")
 
-    if st.session_state.settings_mode and st.button(t["back"]):
-        exit_settings()
-        st.rerun()
+    if st.session_state.settings_mode:
+        if st.button(t["back"], key="back_to_chat_btn", use_container_width=True):
+            exit_settings()
+            st.rerun()
         
     st.title(t["menu"])
     if st.button(t["new_chat"], use_container_width=True, type="primary"):
