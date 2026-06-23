@@ -149,21 +149,26 @@ IS_GUEST = st.session_state.get("is_guest", False)
 HISTORY_FILE = None if IS_GUEST else f"chat_history_{USERNAME}.json"
 
 API_KEY = "AQ.Ab8RN6Kco8jwXkdJf-U1Vc7rP4fH74pFtxSzZsN1bMzAH02jHQ" 
-API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
+API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
 # ==========================================
 # 2. ФУНКЦІЇ РОБОТИ З API ТА ВЕКТОРНОЮ БАЗОЮ
 # ==========================================
 def call_external_llm(prompt):
-    if API_KEY == "ВАШ_GEMINI_API_КЛЮЧ":
+    if API_KEY == "AQ.Ab8RN6Kco8jwXkdJf-U1Vc7rP4fH74pFtxSzZsN1bMzAH02jHQ" or not API_KEY:
         return "⚠️ Будь ласка, вкажіть діючий API Ключ у коді програми (`API_KEY`), щоб використовувати Google Gemini."
-    
-    headers = {"Content-Type": "application/json"}
+
+    # Передаємо ключ безпечно через заголовки
+    headers = {
+        "Content-Type": "application/json",
+        "x-goog-api-key": API_KEY  
+    }
     payload = {
         "contents": [{"parts": [{"text": f"You are a helpful Python AI Tutor. Answer precisely. User question: {prompt}"}]}],
         "generationConfig": {"temperature": 0.7, "maxOutputTokens": 1000}
     }
     try:
+        # Запит йде на чистий API_URL без ?key= в кінці
         response = requests.post(API_URL, headers=headers, json=payload, timeout=12)
         if response.status_code == 200:
             return response.json()['candidates'][0]['content']['parts'][0]['text']
