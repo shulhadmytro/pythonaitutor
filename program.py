@@ -53,7 +53,7 @@ try:
     with open('config.yaml', 'r', encoding='utf-8') as file:
         config = yaml.load(file, Loader=SafeLoader) or {}
 except FileNotFoundError:
-    st.error("Помилка: Файл 'config.yaml' не знадено! Створіть його поруч із program.py.")
+    st.error("Помилка: Файл 'config.yaml' не знадено! Створіть його поруч із програмою.")
     st.stop()
 
 if 'credentials' not in config:
@@ -118,7 +118,7 @@ if not st.session_state.get("authentication_status") and not st.session_state["i
                 elif new_password != new_password_repeat:
                     st.error("Паролі не збігаються!")
                 elif len(new_password) < 6:
-                    st.error("Пароль має бути не менше 6 symbols.")
+                    st.error("Пароль має бути не менше 6 символів.")
                 else:
                     salt = bcrypt.gensalt()
                     hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), salt).decode('utf-8')
@@ -142,7 +142,7 @@ if not st.session_state.get("authentication_status") and not st.session_state["i
             
     st.stop()
 
-# Гарантуємо дефолтні значення, якщо користувач вийшов або зайшов як гість
+# Дефолтні значення стану
 USERNAME = st.session_state.get("username", "guest")
 USER_FULL_NAME = st.session_state.get("name", "Гість")
 IS_GUEST = st.session_state.get("is_guest", False)
@@ -208,39 +208,59 @@ def get_bot_response(prompt, collection_obj, model_obj, translations_dict, use_l
     if not collection_obj: 
         return "Database Error: Векторна база даних недоступна."
         
-    # ВИПРАВЛЕННЯ: оскільки модель агностична до мов, але документи Codeforces записані українською, 
-    # ми робимо два паралельних запити або шукаємо оригінальним текстом, щоб не ламати логіку ua_codeforces
-    is_en = all(ord(c) < 128 for c in prompt.replace(" ", ""))
+    # Нормалізація та очищення запиту
+    clean_prompt = prompt.strip().lower()
     
-    # Шукаємо за оригінальним промптом (ефективно для українського ua_codeforces)
-    res = collection_obj.query(query_embeddings=[model_obj.encode(prompt).tolist()], n_results=3)
-    
-    # Якщо нічого не знайдено або текст був українською (а теорія в local_doc англійська), 
-    # робимо додатковий пошук з перекладом
-    if not is_en and (not res['documents'] or not res['documents'][0]):
-        search_query = GoogleTranslator(source='auto', target='en').translate(prompt)
-        res = collection_obj.query(query_embeddings=[model_obj.encode(search_query).tolist()], n_results=3)
+    # Виправляємо сленгові запити для англомовного ембеддінгу
+    if "пайтон" in clean_prompt:
+        clean_prompt = clean_prompt.replace("пайтон", "Python")
         
+    is_en = all(ord(c) < 128 for c in clean_prompt.replace(" ", ""))
+    
+    # Створюємо перекладений запит англійською (для пошуку по local_doc теорії)
+    search_query = clean_prompt if is_en else GoogleTranslator(source='auto', target='en').translate(clean_prompt)
+    
+    # Робимо ширший пошук (топ-5 результатів) для розумного вибору джерела
+    res = collection_obj.query(
+        query_embeddings=[model_obj.encode(search_query).tolist()], 
+        n_results=5
+    )
+    
     if res['documents'] and res['documents'][0] and len(res['documents'][0]) > 0:
         documents = res['documents'][0]
         metadatas = res['metadatas'][0]
         
-        # Шукаємо найкращий збіг
+        # Маркер: чи користувач шукає загальну теоретичну інформацію
+        is_theory_request = any(word in clean_prompt for word in ["що таке", "що це", "теорія", "поясни", "опис", "definition", "what is"])
+        
         selected_idx = 0
-        for idx, meta in enumerate(metadatas):
-            if meta.get("source") in ["local_doc", "ua_codeforces"]:
-                selected_idx = idx
-                break
-                
+        found = False
+        
+        # Розумний підбір: якщо питання про теорію — пріоритет local_doc. Якщо ні — ua_codeforces
+        if is_theory_request:
+            for idx, meta in enumerate(metadatas):
+                if meta.get("source") == "local_doc":
+                    selected_idx = idx
+                    found = True
+                    break
+        else:
+            for idx, meta in enumerate(metadatas):
+                if meta.get("source") == "ua_codeforces":
+                    selected_idx = idx
+                    found = True
+                    break
+                    
+        if not found:
+            selected_idx = 0
+            
         ans = documents[selected_idx]
         meta = metadatas[selected_idx]
         
         if ans and ans.strip():
-            # Перекладаємо лише якщо джерело local_doc (англійська теорія) і користувач вибрав не англійську
+            # Перекладаємо лише якщо це англійська теорія, а інтерфейс український
             if meta.get("source") == "local_doc" and not is_en: 
                 ans = safe_translate_to_uk(ans)
                 
-            # ВИПРАВЛЕННЯ: відповідність з назвою структури у вашій базі тренування ("ua_codeforces")
             is_local = meta.get("source") == "local_doc"
             src = translations_dict["source_local" if is_local else "source_cf"]
             source_id = meta.get('source_id', meta.get('index', '?'))
@@ -270,7 +290,7 @@ for key, value in defaults.items():
         st.session_state[key] = value
 
 # ==========================================
-# ВИПРАВЛЕНИЙ CSS-БЛОК
+# CSS-БЛОК ДЛЯ СТИЛІЗАЦІЇ
 # ==========================================
 st.markdown(
     "<style>"
@@ -288,7 +308,7 @@ translations = {
         "back": "←", "rename": "✏️ Назва", "delete": "🗑️ Видалити", "input_placeholder": "Запитайте щось про Python...", 
         "lang_label": "Мова", "save": "OK", "source_local": "🏠 Теорія", "source_cf": "🧠 Алгоритми", 
         "trash_title": "🗑️ Кошик", "trash_empty": "Кошик порожній", "restore": "🔄 Відновити", "clear_trash": "🚨 Очистити кошик", 
-        "edit_msg": "✏️ Редагувати", "cancel": "Скасувати", "llm_toggle": "🤖 Використивувати Google Gemini (API)", 
+        "edit_msg": "✏️ Редагувати", "cancel": "Скасувати", "llm_toggle": "🤖 Використовувати Google Gemini (API)", 
         "logout": "🚪 Вийти з акаунта",
         "not_found_msg": "🤖 Я не знаю відповіді на це запитання. Спробуйте перефразувати його або увімкніть роботу з Google Gemini (API) в налаштуваннях."
     },
@@ -312,6 +332,7 @@ def load_resources():
         return SentenceTransformer('all-MiniLM-L6-v2'), None
 
 model, collection = load_resources()
+
 st.set_page_config(
     page_title=t["title"], 
     page_icon="🎓", 
