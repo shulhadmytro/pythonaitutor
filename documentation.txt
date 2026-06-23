@@ -1,0 +1,71 @@
+<source_1>
+Subject: What is Python. Python is a high-level, general-purpose programming language created by Guido van Rossum in 1991, which focuses on code readability and is used in web development, AI, and science.
+
+<source_2>
+Subject: Advantages of Python. The key advantages of Python are its low barrier to entry, English-like syntax, a massive ecosystem of third-party packages (PyPI), and a feature-rich standard library.
+
+<source_3>
+Subject: Libraries in Python. A library is a collection of ready-made code (functions and classes) created to speed up development, ensure reliability, and solve common tasks without the need to write everything from scratch.
+
+<source_4>
+Subject: Types of Libraries. Libraries in Python are divided into standard libraries, which are built into the language by default, and third-party libraries, which are created by the community and installed separately via the pip package manager.
+
+<source_5>
+Subject: Python Standard Libraries. The standard library is a set of built-in modules (e.g., math, os, json) that are installed along with the language and cover the basic needs of a programmer.
+
+<source_6>
+Subject: Using Standard Libraries. To work with a standard library, you must import the required module at the beginning of the script using the keyword import <library_name>.
+
+<source_7>
+Subject: Python Third-Party Libraries. Third-party libraries are tools from independent developers (e.g., NumPy, Flask, PyTorch) that extend the language's capabilities for specific tasks, such as data analysis or creating neural networks.
+
+<source_8>
+Subject: Using Third-Party Libraries. Third-party libraries are first installed via the terminal using the command pip install library_name, and then added to the code using the import instruction.
+
+<source_9>
+Subject: Data Types in Python. In Python, data types are divided into scalars (int, float, str, bool) and collections (list, tuple, dict, set), as well as mutable and immutable structures.
+
+<source_10>
+Subject: Integers (int). The int type uses "arbitrary-precision arithmetic," allowing it to work with numbers of any size, where each number is an immutable object in memory.
+
+<source_11>
+Subject: Floating-Point Numbers (float). The float type represents fractional numbers as binary fractions with limited precision (usually 53 bits), which sometimes leads to approximate values during calculations.
+
+<source_12>
+Subject: Strings (str). A string (str) is an ordered sequence of Unicode characters, where each character has its own index, allowing work with text in any language.
+
+<source_13>
+Subject: Lists (list). Lists are ordered mutable collections (dynamic arrays) that store references to various objects and allow elements to be freely added, removed, or changed.
+
+<source_14>
+Subject: Creating and Using Lists. Lists are created using square brackets [] or the list() function and are used to store flexible sequences of objects.
+
+<source_15>
+Subject: Tuples (tuple). A tuple is an immutable ordered sequence of elements created using parentheses () that guarantees data integrity throughout the program's execution.
+
+<source_16>
+Subject: Dictionaries (dict). A dictionary is an ordered data structure that stores information in "key-value" pairs and allows for the instant retrieval of a value by its unique key.
+
+<source_17>
+Subject: Sets (set). A set is an unordered collection of unique elements used to remove duplicates, check for membership, and perform mathematical operations on groups of objects.
+
+<source_18>
+Subject: Operators in Python. An operator is a special symbol or word that initiates a mathematical, logical, or computational operation on data (operands).
+
+<source_19>
+Subject: Types of Operators. Operators in Python are classified by purpose: arithmetic for calculations, logical for checking conditions, comparison for matching values, and assignment operators.
+
+<source_20>
+Subject: Arithmetic Operators. Arithmetic operators include symbols for basic actions (+, -, *, /), as well as specific tools: // (floor division), % (modulus), and ** (exponentiation).
+
+<source_21>
+Subject: Logical Operators (and, or, not). Logical operators work with boolean values: "and" requires all conditions to be true, "or" requires at least one, and "not" flips the value to its opposite.
+
+<source_22>
+Subject: Comparison Operators. Comparison operators (==, !=, >, <, >=, <=) match two values and always return a logical result of True or False.
+
+<source_23>
+Subject: Assignment Operators. Assignment operators are used to write values into variables and include the basic = sign and combined forms (e.g., +=, *=) that combine arithmetic with writing.
+
+<source_24>
+Subject: Conditional Statements (if, elif, else). Conditional statements allow a program to make decisions: "if" sets the initial condition, "elif" checks additional options, and "else" executes if none of the previous conditions were met.

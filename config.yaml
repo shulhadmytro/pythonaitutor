@@ -1,0 +1,26 @@
+cookie:
+  expiry_days: 30
+  key: signature_key_v3
+  name: auth_cookie_v3_navigation
+credentials:
+  usernames:
+    test:
+      email: ''
+      name: '1'
+      password: $2b$12$GXyUKUXvdqUH4AyiJbmk0eAGX100bpQw3bwfpCnjcfGnrFW4oF8..
+    test_user:
+      email: test@student.com
+      name: Іван Студент
+      password: $2b$12$clZ8B39q9D7v1v4G4g2EfeXmC7vT6y8mPqW.H4fNqY5u0O3K6Xz4G
+    testaccount1:
+      email: ''
+      name: Шульга Дмитро
+      password: $2b$12$PbCxDd8B91Cr3LGE4yopk.gjoAXs2./30mY.qJu4W4juZjefGyOfS
+    testaccount2:
+      email: ''
+      name: Шульга Дмитро
+      password: $2b$12$T.S2TldDGegJ1Mi4AjCUgeqaZbmEdEHNHM1wH5ZR3LNGId8r7XhRS
+    testlogin11:
+      email: ''
+      name: Шульга Дмитро
+      password: $2b$12$OOY0fNcz1UaXuIhcyu8j9.1BcojZrwNgG2i8OeHRyNew37dPOK2N2
