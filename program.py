@@ -214,7 +214,6 @@ def get_bot_response(prompt, collection_obj, model_obj, translations_dict, use_l
         documents = res['documents'][0]
         metadatas = res['metadatas'][0]
         
-        # ВИПРАВЛЕНО СИНТАКСИС (Рядок 217)
         selected_idx = 0
         for idx, meta in enumerate(metadatas):
             if meta.get("source") == "local_doc":
@@ -252,10 +251,13 @@ for key, value in defaults.items():
     if key not in st.session_state:
         st.session_state[key] = value
 
-# ВИПРАВЛЕНО ТУТ: Змінено CSS, щоб стрілка бічної панелі не ховалася
+# ==========================================
+# ВИПРАВЛЕНИЙ CSS-БЛОК (Стрілка бічної панелі тепер працює)
+# ==========================================
 st.markdown(
     "<style>"
-    "[data-testid='stAppDeployButton'], [data-testid='stToolbar'] {display:none!important;} "
+    "[data-testid='stAppDeployButton'], [data-testid='stToolbarActions'] {display:none!important;} "
+    "[data-testid='stToolbar'] {background: transparent!important;} "
     "[data-testid='stMainBlockContainer'] {padding-top:2rem!important;} "
     ".edit-btn button {padding:2px 8px!important; font-size:12px!important; min-height:24px!important;}"
     "</style>", 
