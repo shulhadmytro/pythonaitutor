@@ -208,18 +208,27 @@ def get_bot_response(prompt, collection_obj, model_obj, translations_dict, use_l
     if not collection_obj: 
         return "Database Error: Векторна база даних недоступна."
         
+    # ВИПРАВЛЕННЯ: оскільки модель агностична до мов, але документи Codeforces записані українською, 
+    # ми робимо два паралельних запити або шукаємо оригінальним текстом, щоб не ламати логіку ua_codeforces
     is_en = all(ord(c) < 128 for c in prompt.replace(" ", ""))
-    search_query = prompt if is_en else GoogleTranslator(source='auto', target='en').translate(prompt)
     
-    res = collection_obj.query(query_embeddings=[model_obj.encode(search_query).tolist()], n_results=3)
+    # Шукаємо за оригінальним промптом (ефективно для українського ua_codeforces)
+    res = collection_obj.query(query_embeddings=[model_obj.encode(prompt).tolist()], n_results=3)
     
+    # Якщо нічого не знайдено або текст був українською (а теорія в local_doc англійська), 
+    # робимо додатковий пошук з перекладом
+    if not is_en and (not res['documents'] or not res['documents'][0]):
+        search_query = GoogleTranslator(source='auto', target='en').translate(prompt)
+        res = collection_obj.query(query_embeddings=[model_obj.encode(search_query).tolist()], n_results=3)
+        
     if res['documents'] and res['documents'][0] and len(res['documents'][0]) > 0:
         documents = res['documents'][0]
         metadatas = res['metadatas'][0]
         
+        # Шукаємо найкращий збіг
         selected_idx = 0
         for idx, meta in enumerate(metadatas):
-            if meta.get("source") == "local_doc":
+            if meta.get("source") in ["local_doc", "ua_codeforces"]:
                 selected_idx = idx
                 break
                 
@@ -227,11 +236,16 @@ def get_bot_response(prompt, collection_obj, model_obj, translations_dict, use_l
         meta = metadatas[selected_idx]
         
         if ans and ans.strip():
-            if not is_en: 
+            # Перекладаємо лише якщо джерело local_doc (англійська теорія) і користувач вибрав не англійську
+            if meta.get("source") == "local_doc" and not is_en: 
                 ans = safe_translate_to_uk(ans)
                 
-            src = translations_dict["source_local" if meta.get("source") == "local_doc" else "source_cf"]
-            return f"**Джерело:** {src} (ID: `{meta.get('source_id', meta.get('index', '?'))}`)\n\n{ans}"
+            # ВИПРАВЛЕННЯ: відповідність з назвою структури у вашій базі тренування ("ua_codeforces")
+            is_local = meta.get("source") == "local_doc"
+            src = translations_dict["source_local" if is_local else "source_cf"]
+            source_id = meta.get('source_id', meta.get('index', '?'))
+            
+            return f"**Джерело:** {src} (ID: `{source_id}`)\n\n{ans}"
         
     return translations_dict["not_found_msg"]
 
@@ -256,7 +270,7 @@ for key, value in defaults.items():
         st.session_state[key] = value
 
 # ==========================================
-# ВИПРАВЛЕНИЙ CSS-БЛОК (Стрілка бічної панелі тепер працює)
+# ВИПРАВЛЕНИЙ CSS-БЛОК
 # ==========================================
 st.markdown(
     "<style>"
