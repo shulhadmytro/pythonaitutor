@@ -158,7 +158,6 @@ def call_external_llm(prompt):
     if API_KEY == "AQ.Ab8RN6Kco8jwXkdJf-U1Vc7rP4fH74pFtxSzZsN1bMzAH02jHQ" or not API_KEY:
         return "⚠️ Будь ласка, вкажіть діючий API Ключ у коді програми (`API_KEY`), щоб використовувати Google Gemini."
 
-    # Передаємо ключ безпечно через заголовки
     headers = {
         "Content-Type": "application/json",
         "x-goog-api-key": API_KEY  
@@ -168,7 +167,6 @@ def call_external_llm(prompt):
         "generationConfig": {"temperature": 0.7, "maxOutputTokens": 1000}
     }
     try:
-        # Запит йде на чистий API_URL без ?key= в кінці
         response = requests.post(API_URL, headers=headers, json=payload, timeout=12)
         if response.status_code == 200:
             return response.json()['candidates'][0]['content']['parts'][0]['text']
@@ -215,7 +213,7 @@ def get_bot_response(prompt, collection_obj, model_obj, translations_dict, use_l
     
     res = collection_obj.query(query_embeddings=[model_obj.encode(search_query).tolist()], n_results=3)
     
-    if res['documents'] and res['documents'][0]:
+    if res['documents'] and res['documents'][0] and len(res['documents'][0]) > 0:
         documents = res['documents'][0]
         metadatas = res['metadatas'][0]
         
@@ -228,13 +226,14 @@ def get_bot_response(prompt, collection_obj, model_obj, translations_dict, use_l
         ans = documents[selected_idx]
         meta = metadatas[selected_idx]
         
-        if not is_en: 
-            ans = safe_translate_to_uk(ans)
-            
-        src = translations_dict["source_local" if meta.get("source") == "local_doc" else "source_cf"]
-        return f"**Джерело:** {src} (ID: `{meta.get('source_id', meta.get('index', '?'))}`)\n\n{ans}"
+        if ans and ans.strip():
+            if not is_en: 
+                ans = safe_translate_to_uk(ans)
+                
+            src = translations_dict["source_local" if meta.get("source") == "local_doc" else "source_cf"]
+            return f"**Джерело:** {src} (ID: `{meta.get('source_id', meta.get('index', '?'))}`)\n\n{ans}"
         
-    return "Відповідь не знайдена у локальній базі."
+    return translations_dict["not_found_msg"]
 
 # --- ІНІЦІАЛІЗАЦІЯ СТАНУ СЕСІЇ ---
 if "chat_archive" not in st.session_state:
@@ -270,8 +269,24 @@ st.markdown(
 )
 
 translations = {
-    "UA": {"title": "Python AI Tutor", "menu": "📜 Ваші чати", "new_chat": "+ Новий чат", "settings": "⚙️ Налаштування", "back": "←", "rename": "✏️ Назва", "delete": "🗑️ Видалити", "input_placeholder": "Запитайте щось про Python...", "lang_label": "Мова", "save": "OK", "source_local": "🏠 Теорія", "source_cf": "🧠 Алгоритми", "trash_title": "🗑️ Кошик", "trash_empty": "Кошик порожній", "restore": "🔄 Відновити", "clear_trash": "🚨 Очистити кошик", "edit_msg": "✏️ Редагувати", "cancel": "Скасувати", "llm_toggle": "🤖 Використивувати Google Gemini (API)", "logout": "🚪 Вийти з акаунта"},
-    "EN": {"title": "Python AI Tutor", "menu": "📜 Your Chats", "new_chat": "+ New Chat", "settings": "⚙️ Settings", "back": "←", "rename": "✏️ Rename", "delete": "🗑️ Delete", "input_placeholder": "Ask something about Python...", "lang_label": "Language", "save": "OK", "source_local": "🏠 Theory", "source_cf": "🧠 Algorithms", "trash_title": "🗑️ Trash Bin", "trash_empty": "Trash is empty", "restore": "🔄 Restore", "clear_trash": "🚨 Empty Trash", "edit_msg": "✏️ Edit", "cancel": "Cancel", "llm_toggle": "🤖 Use Google Gemini (API)", "logout": "🚪 Log Out"}
+    "UA": {
+        "title": "Python AI Tutor", "menu": "📜 Ваші чати", "new_chat": "+ Новий чат", "settings": "⚙️ Налаштування", 
+        "back": "←", "rename": "✏️ Назва", "delete": "🗑️ Видалити", "input_placeholder": "Запитайте щось про Python...", 
+        "lang_label": "Мова", "save": "OK", "source_local": "🏠 Теорія", "source_cf": "🧠 Алгоритми", 
+        "trash_title": "🗑️ Кошик", "trash_empty": "Кошик порожній", "restore": "🔄 Відновити", "clear_trash": "🚨 Очистити кошик", 
+        "edit_msg": "✏️ Редагувати", "cancel": "Скасувати", "llm_toggle": "🤖 Використивувати Google Gemini (API)", 
+        "logout": "🚪 Вийти з акаунта",
+        "not_found_msg": "🤖 Я не знаю відповіді на це запитання. Спробуйте перефразувати його або увімкніть роботу з Google Gemini (API) в налаштуваннях."
+    },
+    "EN": {
+        "title": "Python AI Tutor", "menu": "📜 Your Chats", "new_chat": "+ New Chat", "settings": "⚙️ Settings", 
+        "back": "←", "rename": "✏️ Rename", "delete": "🗑️ Delete", "input_placeholder": "Ask something about Python...", 
+        "lang_label": "Language", "save": "OK", "source_local": "🏠 Theory", "source_cf": "🧠 Algorithms", 
+        "trash_title": "🗑️ Trash Bin", "trash_empty": "Trash is empty", "restore": "🔄 Restore", "clear_trash": "🚨 Empty Trash", 
+        "edit_msg": "✏️ Edit", "cancel": "Cancel", "llm_toggle": "🤖 Use Google Gemini (API)", 
+        "logout": "🚪 Log Out",
+        "not_found_msg": "🤖 I don't know the answer to this question. Try rephrasing your request or enable Google Gemini (API) in settings."
+    }
 }
 t = translations[st.session_state.language]
 
